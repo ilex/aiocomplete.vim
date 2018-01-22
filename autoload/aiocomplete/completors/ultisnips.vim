@@ -9,7 +9,7 @@ func! s:complete(ctx, callback) dict abort
     let l:col = a:ctx['col']
     let l:snips = UltiSnips#SnippetsInCurrentScope()
 
-    if !l:snips
+    if empty(l:snips)
         return 
     endif
 
@@ -24,12 +24,12 @@ func! s:complete(ctx, callback) dict abort
 
     let l:matches = []
 
-    for l:word in l:snips
+    for [l:word, l:descr] in items(l:snips)
         if l:word =~ '^' . l:kw
             call add(l:matches, {
                         \ 'abbr': l:word,
                         \ 'word': l:word[kwlen:],
-                        \ 'menu': '[ultisnips]'
+                        \ 'menu': 'snip: ' . l:descr 
                         \})
         endif
     endfor
