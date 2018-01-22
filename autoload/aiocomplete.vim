@@ -3,9 +3,9 @@ let s:completors = {}
 let s:completions = {}
 
 let s:builtin_completors = {
-            \ 'buffer': aiocomplete#completors#buffer#buffer,
-            \ 'jedi': aiocomplete#completors#jedi#jedi,
-            \ 'ultisnips': aiocomplete#completors#ultisnips#ultisnips,
+            \ 'buffer': function('aiocomplete#completors#buffer#build'),
+            \ 'jedi': function('aiocomplete#completors#jedi#build'),
+            \ 'ultisnips': function('aiocomplete#completors#ultisnips#build'),
             \ }
 
 func! aiocomplete#init(config)
@@ -16,8 +16,7 @@ endfunc
 
 func! s:register_completor(name, config)
     if has_key(s:builtin_completors, a:name)
-        let s:completors[a:name] = s:builtin_completors[a:name]
-        call s:completors[a:name].init(a:config)
+        let s:completors[a:name] = s:builtin_completors[a:name](a:config)
     endif
     " TODO: add external completor
     call s:register_events()
@@ -76,7 +75,7 @@ func! s:start_complete() abort
     let s:completions = {}
     let l:ctx = s:get_context()
     for [l:name, l:completor] in items(b:aiocompletors)
-        call l:completor.complete(l:ctx, function('s:show_completions', [l:name]))
+        call l:completor.invoke_complete(l:ctx, function('s:show_completions', [l:name]))
     endfor
 endfunc
 

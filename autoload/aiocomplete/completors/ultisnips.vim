@@ -1,27 +1,16 @@
-let aiocomplete#completors#ultisnips#ultisnips = {
-            \ 'invoke_pattern': '\k$',
-            \ 'priority': 0,
-            \ 'include': ['*'],
-            \ 'exclude': []
-            \ }
+func aiocomplete#completors#ultisnips#build(config) abort
+    let l:res = aiocomplete#completors#base#build(a:config)
 
-func! aiocomplete#completors#ultisnips#ultisnips.init(config) abort
-    call extend(self, config)
+    let l:res.complete = function('s:complete')
+    return l:res
 endfunc
 
-func! aiocomplete#completors#ultisnips#ultisnips.complete(ctx, callback) abort
-    if a:ctx['typed'] =~ self.invoke_pattern
-        let [l:startcol, l:words] = s:complete(a:ctx)
-        call a:callback(a:ctx, l:startcol, l:words)
-    endif
-endfunc
-
-func! s:complete(ctx) abort
+func! s:complete(ctx, callback) dict abort
     let l:col = a:ctx['col']
     let l:snips = UltiSnips#SnippetsInCurrentScope()
 
     if !l:snips
-        return [l:col, []]
+        return 
     endif
 
     let l:typed = a:ctx['typed']
@@ -30,7 +19,7 @@ func! s:complete(ctx) abort
     let kwlen = len(l:kw)
 
     if kwlen < 1
-        return [l:col, []] 
+        return 
     endif
 
     let l:matches = []
@@ -44,5 +33,5 @@ func! s:complete(ctx) abort
                         \})
         endif
     endfor
-    return [l:col, l:matches]
+    call a:callback(a:ctx, l:col, l:matches)
 endfunc

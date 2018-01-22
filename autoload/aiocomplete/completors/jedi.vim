@@ -1,30 +1,30 @@
 let s:server = expand('<sfile>:p:h:h:h') . '/pythonx/aiocomplete_jedi.py'
 
-let aiocomplete#completors#jedi#jedi = {
-            \ 'invoke_pattern': '\k\.\?$\|import $',
-            \ 'priority': 0,
-            \ 'include': ['python'],
-            \ 'exclude': []
-            \ }
+func aiocomplete#completors#jedi#build(config) abort
+    let l:config = extend({
+                \ 'invoke_pattern': '\k\.\?$\|import $',
+                \ 'include': ['python'],
+                \ }, a:config)
+    let l:res = aiocomplete#completors#base#build(l:config)
 
-func! aiocomplete#completors#jedi#jedi.init(config) abort
-    call extend(self, a:config)
+    let l:res.complete = function('s:complete')
+
     call s:init_jedi()
+
+    return l:res
 endfunc
 
-func! aiocomplete#completors#jedi#jedi.complete(ctx, callback) abort
-    if a:ctx['typed'] =~ self.invoke_pattern
-        let l:ctx = {
-            \ 'src': join(getline(1, '$'), "\n"),
-            \ 'line': a:ctx['lnum'],
-            \ 'col': a:ctx['col'] - 1, 
-            \ 'path': a:ctx['path']
-        \ }
-        call s:ensure_channel_open(self)
-        call ch_sendexpr(self.channel, l:ctx, {
-                    \ 'callback': function('s:complete_handler', [a:ctx, a:callback])
-                    \})
-    endif
+func! s:complete(ctx, callback) dict abort
+    let l:ctx = {
+                \ 'src': join(getline(1, '$'), "\n"),
+                \ 'line': a:ctx['lnum'],
+                \ 'col': a:ctx['col'] - 1, 
+                \ 'path': a:ctx['path']
+                \ }
+    call s:ensure_channel_open(self)
+    call ch_sendexpr(self.channel, l:ctx, {
+                \ 'callback': function('s:complete_handler', [a:ctx, a:callback])
+                \})
 endfunc
 
 func! s:ensure_channel_open(completor) abort
@@ -36,7 +36,7 @@ endfunc
 func! s:complete_handler(ctx, callback, channel, msg) abort
     let l:completions = []
     for l:comp in a:msg
-        call add(l:completions, {'abbr': l:comp['name'], 'word': l:comp['tail'], 'menu': l:comp['desc']})
+        call add(l:completions, {'abbr': l:comp['name'], 'word': l:comp['tail'], 'menu': '[jedi]'})
     endfor
     call a:callback(a:ctx, a:ctx['col'], l:completions)
 endfunc

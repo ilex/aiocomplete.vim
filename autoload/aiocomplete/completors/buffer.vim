@@ -1,25 +1,13 @@
 let s:words = {}
-let s:last_word = ''
 
-let aiocomplete#completors#buffer#buffer = {
-            \ 'invoke_pattern': '\k$',
-            \ 'priority': 0,
-            \ 'include': ['*'],
-            \ 'exclude': []
-            \ }
+func aiocomplete#completors#buffer#build(config) abort
+    let l:res = aiocomplete#completors#base#build(a:config)
 
-func! aiocomplete#completors#buffer#buffer.init(config) abort
-    call extend(self, a:config)
+    let l:res.complete = function('s:complete')
+    return l:res
 endfunc
 
-func! aiocomplete#completors#buffer#buffer.complete(ctx, callback) abort
-    if a:ctx['typed'] =~ self.invoke_pattern
-        let [l:startcol, l:words] = s:complete(a:ctx)
-        call a:callback(a:ctx, l:startcol, l:words)
-    endif
-endfunc
-
-func! s:complete(ctx) abort
+func! s:complete(ctx, callback) dict abort
     call s:refresh_keywords()
 
     let l:matches = []
@@ -49,7 +37,7 @@ func! s:complete(ctx) abort
                         \})
         endif
     endfor
-    return [l:col, l:matches]
+    call a:callback(a:ctx, l:col, l:matches)
 endfunc
 
 function! s:refresh_keywords() abort
@@ -60,7 +48,3 @@ function! s:refresh_keywords() abort
         endif
     endfor
 endfunction
-
-func! s:map_completions(key, val) abort
-    return {"word":v:val,"dup":1,"icase":1,"menu": "[buffer]"}
-endfunc
