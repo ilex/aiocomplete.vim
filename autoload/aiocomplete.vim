@@ -6,6 +6,7 @@ let s:builtin_completors = {
             \ 'buffer': function('aiocomplete#completors#buffer#build'),
             \ 'jedi': function('aiocomplete#completors#jedi#build'),
             \ 'ultisnips': function('aiocomplete#completors#ultisnips#build'),
+            \ 'neosnippet': function('aiocomplete#completors#neosnippet#build'),
             \ }
 
 func! aiocomplete#init(config)
