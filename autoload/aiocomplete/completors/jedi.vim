@@ -22,9 +22,11 @@ func! s:complete(ctx, callback) dict abort
                 \ 'path': a:ctx['path']
                 \ }
     call s:ensure_channel_open(self)
-    call ch_sendexpr(self.channel, l:ctx, {
+    try
+        call ch_sendexpr(self.channel, l:ctx, {
                 \ 'callback': function('s:complete_handler', [a:ctx, a:callback])
                 \})
+    endtry
 endfunc
 
 func! s:ensure_channel_open(completor) abort
@@ -36,11 +38,16 @@ endfunc
 func! s:complete_handler(ctx, callback, channel, msg) abort
     let l:completions = []
     for l:comp in a:msg
-        call add(l:completions, {'abbr': l:comp['name'], 'word': l:comp['tail'], 'menu': '[jedi]'})
+        call add(l:completions, {
+                    \ 'abbr': l:comp['name'], 
+                    \ 'word': l:comp['tail'], 
+                    \ 'menu': '[jedi]',
+                    \ 'kind': l:comp['kind']
+                    \ })
     endfor
     call a:callback(a:ctx, a:ctx['col'], l:completions)
 endfunc
 
-func! s:init_jedi()
+func! s:init_jedi() abort
     let s:job = job_start('python ' . s:server)
 endfunc

@@ -34,6 +34,7 @@ func! s:complete(ctx, callback) dict abort
                         \ 'abbr': l:word,
                         \ 'word': l:word[l:kwlen:],
                         \ 'menu': '[buffer]',
+                        \ 'kind': 'v'
                         \})
         endif
     endfor

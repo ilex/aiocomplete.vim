@@ -82,9 +82,10 @@ endfunc
 
 func! s:show_completions(name, ctx, startcol, completions)
     let l:ctx = s:get_context()
-    if l:ctx != a:ctx
+    if ((l:ctx != a:ctx) || empty(a:completions))
         return
     endif
+
     let l:completor = get(b:aiocompletors, a:name)
 
     for l:item in a:completions
@@ -98,8 +99,24 @@ func! s:show_completions(name, ctx, startcol, completions)
             let s:completions[l:item['abbr']] = l:item
         endif
     endfor
+    let l:results = sort(values(s:completions), 's:sort_function')
+    call complete(a:startcol, l:results)
+endfunc
 
-    call complete(a:startcol, values(s:completions))
+func! s:sort_function(x, y) abort
+    if a:x.priority > a:y.priority
+        return -1
+    elseif a:x.priority < a:y.priority
+        return 1
+    endif
+
+    if a:x.abbr > a:y.abbr
+        return -1
+    elseif a:x.abbr < a:y.abbr
+        return 1
+    endif
+
+    return 0
 endfunc
 
 func! s:get_context() abort

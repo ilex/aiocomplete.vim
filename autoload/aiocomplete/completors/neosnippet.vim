@@ -30,7 +30,8 @@ func! s:complete(ctx, callback) dict abort
             call add(l:matches, {
                         \ 'abbr': l:item['word'],
                         \ 'word': l:item['word'][kwlen:],
-                        \ 'menu': 'snip: ' . l:item['menu_abbr']
+                        \ 'menu': 'snip: ' . l:item['menu_abbr'],
+                        \ 'kind': 'd',
                         \})
         endif
     endfor

@@ -13,6 +13,14 @@ except ImportError:
     pass
 
 
+JEDI_TO_VIM_TYPES = {
+    'module': 't',
+    'class': 't',
+    'instance': 'v',
+    'function': 'f'
+}
+
+
 def completions(src, line, col, path):
     script = jedi.Script(src, line, col, path)
     res = script.completions()
@@ -21,7 +29,7 @@ def completions(src, line, col, path):
         'name': c.name,
         'desc': '',
         'tail': c.complete,
-        'kind': c.type
+        'kind': JEDI_TO_VIM_TYPES.get(c.type, 'v')
     } for c in res]
 
 
@@ -46,7 +54,11 @@ async def handle_echo(reader, writer):
 
 async def preload_modules():
     for (_, module, _) in pkgutil.iter_modules():
-        jedi.preload_module(module)
+        try:
+            jedi.preload_module(module)
+        except:
+            # TODO handle this
+            pass
         await asyncio.sleep(0.1)
 
 loop = asyncio.get_event_loop()

@@ -29,7 +29,8 @@ func! s:complete(ctx, callback) dict abort
             call add(l:matches, {
                         \ 'abbr': l:word,
                         \ 'word': l:word[kwlen:],
-                        \ 'menu': 'snip: ' . l:descr 
+                        \ 'menu': 'snip: ' . l:descr,
+                        \ 'kind': 'd', 
                         \})
         endif
     endfor
